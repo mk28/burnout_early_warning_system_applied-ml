@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Burnout Early Warning System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Burnout Risk Assessment</h1>
+        <form id="burnoutForm">
+            <div class="form-group">
+                <label for="sleep_hours">Sleep Hours:</label>
+                <input type="number" id="sleep_hours" name="sleep_hours" required>
+            </div>
+            <div class="form-group">
+                <label for="assignments">Number of Assignments/Deadlines:</label>
+                <input type="number" id="assignments" name="assignments" required>
+            </div>
+            <div class="form-group">
+                <label for="mood">Mood Rating (1-5, 5 being best):</label>
+                <input type="number" id="mood" name="mood" min="1" max="5" required>
+            </div>
+            <div class="form-group">
+                <label for="step_count">Step Count:</label>
+                <input type="number" id="step_count" name="step_count" required>
+            </div>
+            <div class="form-group">
+                <label for="heart_rate">Resting Heart Rate (bpm):</label>
+                <input type="number" id="heart_rate" name="heart_rate" required>
+            </div>
+            <div class="form-group">
+                <label for="study_hours">Study Hours:</label>
+                <input type="number" id="study_hours" name="study_hours" required>
+            </div>
+            <button type="submit">Predict Burnout Risk</button>
+        </form>
+
+        <div id="result" class="hidden">
+            <h2>Prediction:</h2>
+            <p id="prediction"></p>
+            <h2>Recommendations:</h2>
+            <ul id="recommendations"></ul>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
