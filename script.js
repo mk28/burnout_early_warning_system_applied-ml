@@ -1,0 +1,45 @@
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('burnoutForm');
+    const resultDiv = document.getElementById('result');
+    const predictionP = document.getElementById('prediction');
+    const recommendationsUl = document.getElementById('recommendations');
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+        const data = {
+            sleep_hours: parseInt(formData.get('sleep_hours')),
+            assignments: parseInt(formData.get('assignments')),
+            mood: parseInt(formData.get('mood')),
+            step_count: parseInt(formData.get('step_count')),
+            heart_rate: parseInt(formData.get('heart_rate')),
+            study_hours: parseInt(formData.get('study_hours'))
+        };
+
+        fetch('http://127.0.0.1:5000/predict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            resultDiv.classList.remove('hidden');
+            predictionP.textContent = result.prediction;
+            recommendationsUl.innerHTML = '';
+            result.recommendations.forEach(recommendation => {
+                const li = document.createElement('li');
+                li.textContent = recommendation;
+                recommendationsUl.appendChild(li);
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            predictionP.textContent = 'Error predicting burnout risk.';
+            recommendationsUl.innerHTML = '';
+            resultDiv.classList.remove('hidden');
+        });
+    });
+});
