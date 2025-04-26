@@ -4,7 +4,154 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Burnout Early Warning System</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            /* background-color: #f0f0f0;  Light gray background */
+            font-family: 'Arial', sans-serif;
+            background-image: url('https://ts1.mm.bing.net/th?id=OIP.HhdyNcGgucJjYZZZrClJIAHaEK&pid=15.1'); /* Placeholder image URL */
+            background-size: cover;
+            background-position: center;
+        }
+
+        #background-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .login-container {
+            background-color: rgba(255, 255, 255, 0.95); /* Slightly more opaque white */
+            padding: 50px;
+            border-radius: 15px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15); /* Stronger shadow */
+            width: 92%;
+            max-width: 450px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in-out, slideIn 0.5s ease-out;
+            z-index: 1;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.3); /* Subtle border */
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-30px);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .login-container h1 {
+            color: #3498db; /* Blue heading */
+            margin-bottom: 35px;
+            font-size: 2.2rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .login-form .form-group {
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .login-form label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #555;
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+        }
+
+        .login-form label:hover {
+            color: #2c3e50;
+        }
+
+        .login-form input[type="text"],
+        .login-form input[type="password"] {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 1.2rem;
+            transition: box-shadow 0.3s ease, transform 0.2s ease;
+            background-color: #f9f9f9;
+            color: #333;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .login-form input[type="text"]:focus,
+        .login-form input[type="password"]:focus {
+            outline: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+            border-bottom: 2px solid #3498db;
+        }
+
+        .login-form button[type="submit"] {
+            background-color: #3498db;
+            color: white;
+            padding: 18px 28px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: background-color 0.3s ease, transform 0.2s ease-in-out, box-shadow 0.3s ease;
+            margin-top: 10px;
+            font-weight: 600;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-form button[type="submit"]:hover {
+            background-color: #217dbb;
+            transform: scale(1.04);
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.15);
+        }
+
+        .login-form button[type="submit"]:active {
+            transform: scale(1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        #background-canvas {
+            animation: pulse 5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from {
+                opacity: 0.6;
+            }
+            to {
+                opacity: 0.8;
+            }
+        }
+    </style>
 </head>
 <body>
     <canvas id="background-canvas"></canvas>
@@ -31,18 +178,19 @@
         canvas.height = window.innerHeight;
 
         let particles = [];
-        const particleCount = 120;
-        const baseRadius = 5;
-        const radiusVariation = 2;
-        const baseSpeed = 0.2;
-        const speedVariation = 0.1;
-        const baseAlpha = 0.5;
-        const alphaVariation = 0.2;
-        const baseHue = 240;
-        const hueVariation = 20;
-        const trailLength = 20;
-        const waveFrequency = 0.01;
+        const particleCount = 150;
+        const baseRadius = 6;
+        const radiusVariation = 3;
+        const baseSpeed = 0.3;
+        const speedVariation = 0.2;
+        const baseAlpha = 0.6;
+        const alphaVariation = 0.3;
+        const baseHue = 220;
+        const hueVariation = 30;
+        const trailLength = 25;
+        const waveFrequency = 0.008;
         let time = 0;
+        let animationFrameId;
 
         class Particle {
             constructor() {
@@ -75,12 +223,15 @@
             draw() {
                 for (let i = 0; i < this.trail.length; i++) {
                     const point = this.trail[i];
-                    const opacity = this.alpha * (0.2 + (i / this.trailLength) * 0.8);
-                    const size = this.radius * (0.7 + (i / this.trailLength) * 0.3);
+                    const opacity = this.alpha * (0.1 + (i / this.trailLength) * 0.9);
+                    const size = this.radius * (0.5 + (i / this.trailLength) * 0.5);
+                    const color = `hsla(${this.hue + i * 2}, 70%, ${60 + i * 3}%, ${opacity})`;
 
                     ctx.beginPath();
                     ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
-                    ctx.fillStyle = `hsla(${this.hue}, 80%, 60%, ${opacity})`;
+                    ctx.fillStyle = color;
+                    ctx.shadowColor = color;
+                    ctx.shadowBlur = size * 0.5;
                     ctx.fill();
                     ctx.closePath();
                 }
@@ -96,14 +247,14 @@
 
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            time += 0.1;
+            time += 0.08;
 
             for (let i = 0; i < particles.length; i++) {
                 particles[i].update();
                 particles[i].draw();
             }
 
-            requestAnimationFrame(animate);
+            animationFrameId = requestAnimationFrame(animate);
         }
 
         initParticles();
@@ -113,6 +264,12 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             initParticles();
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
         });
 
         // Get the form element
