@@ -26,28 +26,44 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(result => {
-            // Update prediction text and class based on the result
-            predictionP.textContent = `Prediction: ${result.prediction}`;
-            predictionP.className = 'prediction'; // Reset class
-            if (result.prediction.toLowerCase() === 'high') {
-                predictionP.classList.add('high');
-            } else if (result.prediction.toLowerCase() === 'medium') {
-                predictionP.classList.add('medium');
+            let predictionText = "";
+            let predictionIcon = "";
+            switch (result.prediction.toLowerCase()) {
+                case 'low':
+                    predictionText = "Low Risk - Keep up the good work!";
+                    predictionIcon = "<i class='fas fa-check-circle'></i>"; // Example icon
+                    predictionP.className = 'prediction low';
+                    break;
+                case 'medium':
+                    predictionText = "Medium Risk - Time for some self-care.";
+                    predictionIcon = "<i class='fas fa-exclamation-triangle'></i>"; // Example icon
+                    predictionP.className = 'prediction medium';
+                    break;
+                case 'high':
+                    predictionText = "High Risk - Let's focus on well-being.";
+                    predictionIcon = "<i class='fas fa-heartbeat'></i>"; // Example icon
+                    predictionP.className = 'prediction high';
+                    break;
+                default:
+                    predictionText = `Prediction: ${result.prediction}`;
+                    predictionP.className = 'prediction';
             }
+
+            predictionP.innerHTML = `${predictionIcon} ${predictionText}`; // Combine icon and text
 
             recommendationsUl.innerHTML = '';
             result.recommendations.forEach(recommendation => {
                 const li = document.createElement('li');
-                li.textContent = recommendation;
+                li.innerHTML = `<i class="fas fa-arrow-right"></i> ${recommendation}`; // Example icon
                 recommendationsUl.appendChild(li);
             });
 
-            resultDiv.classList.add('show'); // Add the 'show' class for fade-in
+            resultDiv.classList.add('show');
         })
         .catch(error => {
             console.error('Error:', error);
             predictionP.textContent = 'Error predicting burnout risk.';
-            predictionP.className = 'prediction high'; // Indicate error with high color
+            predictionP.className = 'prediction high';
             recommendationsUl.innerHTML = '';
             resultDiv.classList.add('show');
         });
