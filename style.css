@@ -1,57 +1,63 @@
 body {
     font-family: sans-serif;
-    margin: 20px;
-    background-color: #f4f4f4;
+    margin: 0; /* Adjust margin for full background */
+    background-color: #e9ecef; /* Light gray background */
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    background-image: url("https://images.unsplash.com/photo-1497215728101-856f43b4212b?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 .container {
-    background-color: #fff;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 80%;
-    max-width: 600px;
+    background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent white */
+    padding: 40px; /* Increased padding */
+    border-radius: 12px; /* More rounded corners */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Softer shadow */
+    width: 90%; /* Increased width for better spacing on larger screens */
+    max-width: 700px; /* Increased max width */
 }
 
 h1, h2 {
     text-align: center;
-    color: #333;
+    color: #343a40; /* Darker gray for headings */
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px; /* Increased spacing */
 }
 
 label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 8px; /* Increased spacing */
     font-weight: bold;
-    color: #555;
+    color: #495057; /* Slightly darker label text */
 }
 
 input[type="number"] {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 12px; /* Increased padding */
+    border: 1px solid #ced4da; /* Light gray border */
+    border-radius: 6px; /* More rounded input fields */
     box-sizing: border-box;
+    font-size: 1rem; /* Slightly larger font */
 }
 
 button[type="submit"] {
     background-color: #007bff;
     color: white;
-    padding: 12px 20px;
+    padding: 14px 24px; /* Increased padding */
     border: none;
-    border-radius: 4px;
+    border-radius: 6px; /* Rounded button */
     cursor: pointer;
-    font-size: 16px;
+    font-size: 1.1rem; /* Slightly larger font */
     display: block;
     width: 100%;
-    margin-top: 20px;
+    margin-top: 25px; /* Increased spacing */
+    transition: background-color 0.3s ease; /* Smooth hover transition */
 }
 
 button[type="submit"]:hover {
@@ -59,22 +65,45 @@ button[type="submit"]:hover {
 }
 
 #result {
-    margin-top: 30px;
-    padding: 15px;
-    border: 1px solid #eee;
-    border-radius: 4px;
-    background-color: #f9f9f9;
+    margin-top: 40px; /* Increased spacing */
+    padding: 20px; /* Increased padding */
+    border: 1px solid #dee2e6; /* Lighter border */
+    border-radius: 6px; /* Rounded result area */
+    background-color: #f8f9fa; /* Light background for result */
+    opacity: 0; /* Initially hidden for fade-in */
+    transition: opacity 0.5s ease-in-out; /* Fade-in transition */
+}
+
+#result.show {
+    opacity: 1; /* Make visible with fade-in */
 }
 
 #prediction {
-    font-size: 1.2em;
+    font-size: 1.3rem; /* Larger prediction text */
     font-weight: bold;
-    margin-bottom: 10px;
+    margin-bottom: 15px; /* Increased spacing */
+    color: #28a745; /* Green for a positive feel */
+    text-align: center; /* Center the prediction */
+}
+
+#prediction.high {
+    color: #dc3545; /* Red for high risk */
+}
+
+#prediction.medium {
+    color: #ffc107; /* Yellow/amber for medium risk */
+}
+
+h2 {
+    margin-top: 25px; /* Increased spacing */
+    color: #343a40;
 }
 
 #recommendations {
     list-style-type: disc;
-    padding-left: 20px;
+    padding-left: 25px; /* Adjusted padding */
+    font-size: 1rem; /* Slightly larger font */
+    color: #495057;
 }
 
 .hidden {

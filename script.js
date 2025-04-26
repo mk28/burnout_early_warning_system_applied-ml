@@ -26,20 +26,30 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(result => {
-            resultDiv.classList.remove('hidden');
-            predictionP.textContent = result.prediction;
+            // Update prediction text and class based on the result
+            predictionP.textContent = `Prediction: ${result.prediction}`;
+            predictionP.className = 'prediction'; // Reset class
+            if (result.prediction.toLowerCase() === 'high') {
+                predictionP.classList.add('high');
+            } else if (result.prediction.toLowerCase() === 'medium') {
+                predictionP.classList.add('medium');
+            }
+
             recommendationsUl.innerHTML = '';
             result.recommendations.forEach(recommendation => {
                 const li = document.createElement('li');
                 li.textContent = recommendation;
                 recommendationsUl.appendChild(li);
             });
+
+            resultDiv.classList.add('show'); // Add the 'show' class for fade-in
         })
         .catch(error => {
             console.error('Error:', error);
             predictionP.textContent = 'Error predicting burnout risk.';
+            predictionP.className = 'prediction high'; // Indicate error with high color
             recommendationsUl.innerHTML = '';
-            resultDiv.classList.remove('hidden');
+            resultDiv.classList.add('show');
         });
     });
 });
