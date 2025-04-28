@@ -454,7 +454,7 @@ def main():
     with st.sidebar:
         st.header("About the Model")
         st.markdown("""
-        Our burnout prediction model is trained on data from over 5,000 college students across 
+        Our burnout prediction model is trained on data from over 620 college students across 
         multiple universities. The model uses machine learning algorithms to identify patterns 
         and risk factors associated with academic burnout.
         
