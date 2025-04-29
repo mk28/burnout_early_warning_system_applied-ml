@@ -57,11 +57,11 @@ def load_model(model_path: str) -> Tuple[Any, Dict[str, float]]:
                 # Set probabilities based on risk score
                 for i, score in enumerate(risk_scores):
                     if score > 15:  # High risk
-                        probas[i] = [0.1, 0.2, 0.7]  # 70% chance of high risk burnout
+                        probas[i] = [0.1, 0.2, 0.7]
                     elif score > 10:  # Medium risk
-                        probas[i] = [0.2, 0.6, 0.2]  # 60% chance of medium risk burnout
+                        probas[i] = [0.2, 0.6, 0.2]
                     else:  # Low risk
-                        probas[i] = [0.7, 0.2, 0.1]  # 70% chance of low risk, only 30% chance of burnout
+                        probas[i] = [0.7, 0.2, 0.1]
                 return probas
             
             def _calculate_risk_scores(self, X):
@@ -275,10 +275,7 @@ def display_burnout_prediction(prediction: int, probability: float, user_data: p
                 st.markdown(f"Our assessment indicates you have a **{probability:.1%} chance** of developing burnout symptoms if stress continues.")
             else:
                 st.success("### ✅ Low Risk of Burnout")
-                # For low risk, we want to show the complementary probability (1-probability)
-                # since probability here is the chance of being in the low risk class
-                burnout_chance = 0.3  # From the model, low risk class has 30% chance of burnout
-                st.markdown(f"Our assessment indicates you have good balance with only a **{burnout_chance:.1%} chance** of burnout.")
+                st.markdown(f"Our assessment indicates you have good balance with only a **{probability:.1%} chance** of burnout.")
         
         with col2:
             # Create a visual meter for risk level
@@ -500,10 +497,7 @@ def main():
     if submitted and user_data is not None:
         # Make prediction
         prediction = int(model.predict(user_data)[0])
-        
-        # For clarity, extract the right probability based on the prediction class
-        probabilities = model.predict_proba(user_data)[0]
-        probability = probabilities[prediction]
+        probability = model.predict_proba(user_data)[0][prediction]
         
         # Display results and recommendations
         display_burnout_prediction(prediction, probability, user_data)
