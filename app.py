@@ -50,42 +50,85 @@ def load_model(model_path: str) -> Tuple[Any, Dict[str, float]]:
                 return predictions
             
             def predict_proba(self, X):
-                # Generate probabilities
+                # Generate probabilities based on actual risk score
                 risk_scores = self._calculate_risk_scores(X)
                 probas = np.zeros((len(X), 3))
                 
-                # Set probabilities based on risk score
+                # Set probabilities based on risk score - FIXED to use actual values
                 for i, score in enumerate(risk_scores):
+                    # Calculate normalized risk score (0-1) for better probability distribution
+                    norm_score = min(max(score / 20, 0), 1)
+                    
                     if score > 15:  # High risk
-                        probas[i] = [0.1, 0.2, 0.7]  # 70% chance of high risk burnout
+                        # Higher score means higher probability of burnout
+                        high_prob = 0.6 + (norm_score * 0.3)  # Range: 0.6-0.9
+                        med_prob = 0.9 - high_prob
+                        low_prob = 0.1
+                        probas[i] = [low_prob, med_prob, high_prob]
+                        
                     elif score > 10:  # Medium risk
-                        probas[i] = [0.2, 0.6, 0.2]  # 60% chance of medium risk burnout
+                        # Centered around medium probability
+                        relative_position = (score - 10) / 5  # 0-1 within medium range
+                        med_prob = 0.5 + (relative_position * 0.1)  # Range: 0.5-0.6
+                        high_prob = 0.2 + (relative_position * 0.2)  # Range: 0.2-0.4
+                        low_prob = 1 - med_prob - high_prob
+                        probas[i] = [low_prob, med_prob, high_prob]
+                        
                     else:  # Low risk
-                        probas[i] = [0.7, 0.2, 0.1]  # 70% chance of low risk, only 30% chance of burnout
+                        # Lower score means higher probability of low risk
+                        low_prob = 0.6 + ((10 - score) / 10) * 0.3  # Range: 0.6-0.9
+                        med_prob = (score / 10) * 0.3  # Range: 0-0.3
+                        high_prob = 1 - low_prob - med_prob
+                        probas[i] = [low_prob, med_prob, high_prob]
+                    
+                    # Ensure probabilities sum to 1
+                    probas[i] = probas[i] / probas[i].sum()
+                    
                 return probas
             
             def _calculate_risk_scores(self, X):
-                # Calculate risk score based on key features
+                # Calculate risk score based on key features - with more weight on important factors
                 scores = np.zeros(len(X))
                 for i, row in X.iterrows():
                     # Extract values safely with defaults
-                    sleep = row.get('sleep_hours', 7)
+                    sleep_hours = row.get('sleep_hours', 7)
+                    sleep_quality = row.get('sleep_quality', 2)
                     workload = row.get('workload', 40)
                     deadlines = row.get('deadlines', 3)
-                    stress = row.get('stress_level', 5)
-                    support = row.get('social_support', 5)
-                    exercise = row.get('exercise_hours', 3)
+                    stress_level = row.get('stress_level', 5)
+                    social_support = row.get('social_support', 5)
+                    social_isolation = row.get('social_isolation', 2)
+                    exercise_hours = row.get('exercise_hours', 3)
                     screen_time = row.get('screen_time', 6)
+                    meals_skipped = row.get('meals_skipped', 2)
+                    mood = row.get('mood', 3)
+                    motivation = row.get('motivation', 3)
+                    enjoyment_loss = row.get('enjoyment_loss', 2)
                     
-                    # Calculate risk score
+                    # Calculate risk score with improved weighting
                     scores[i] = (
-                        (10 - sleep) * 0.3 + 
-                        (workload / 10) * 0.2 + 
-                        (deadlines * 0.5) + 
-                        stress * 0.3 - 
-                        support * 0.2 - 
-                        exercise * 0.15 +
-                        (screen_time > 8) * 2
+                        # Sleep factors (sleep is critical for burnout prevention)
+                        (9 - sleep_hours) * 0.5 + 
+                        (5 - sleep_quality) * 0.4 +
+                        
+                        # Workload factors
+                        (workload / 10) * 0.3 + 
+                        (deadlines * 0.4) +
+                        
+                        # Stress and emotional factors (strongest predictors)
+                        stress_level * 0.6 +
+                        (5 - mood) * 0.5 +
+                        (6 - motivation) * 0.5 +
+                        (enjoyment_loss - 1) * 0.7 +
+                        
+                        # Social factors
+                        (social_isolation - 1) * 0.5 -
+                        social_support * 0.4 +
+                        
+                        # Physical health factors
+                        (meals_skipped - 1) * 0.3 -
+                        exercise_hours * 0.4 +
+                        ((screen_time - 4) * 0.3 if screen_time > 4 else 0)
                     )
                 return scores
         
@@ -248,13 +291,31 @@ def generate_recommendations(risk_level: str, user_data: pd.DataFrame) -> Dict[s
         recommendations[risk_level]['time_management'].insert(0,
             "Implement screen-free periods during your day to reduce digital fatigue")
     
+    # Add emotional state customizations
+    if 'mood' in user_data and user_data['mood'].iloc[0] <= 2:
+        recommendations[risk_level]['relaxation'].insert(0,
+            "Consider mood-enhancing activities like spending time in nature")
+    
+    if 'enjoyment_loss' in user_data and user_data['enjoyment_loss'].iloc[0] >= 3:
+        recommendations[risk_level]['support'].insert(0,
+            "Reconnect with activities you previously enjoyed, even if briefly")
+    
     return recommendations[risk_level]
 
-def display_burnout_prediction(prediction: int, probability: float, user_data: pd.DataFrame):
+def display_burnout_prediction(prediction: int, probabilities: np.ndarray, user_data: pd.DataFrame):
     """Display burnout prediction and personalized recommendations"""
     # Map prediction to risk level
     risk_levels = {0: 'low', 1: 'medium', 2: 'high'}
     risk_level = risk_levels.get(prediction, 'medium')
+    
+    # Extract the appropriate probability based on risk level
+    if risk_level == 'low':
+        # For low risk, we want to show the combined probability of medium and high risk
+        # This represents the actual burnout chance
+        burnout_chance = probabilities[1] + probabilities[2]  # Medium + High risk
+    else:
+        # For medium and high risk, show the probability of that specific class
+        burnout_chance = probabilities[prediction]
     
     # Create container for results
     results_container = st.container()
@@ -269,15 +330,12 @@ def display_burnout_prediction(prediction: int, probability: float, user_data: p
         with col1:
             if risk_level == 'high':
                 st.error("### ⚠️ High Risk of Burnout")
-                st.markdown(f"Our assessment indicates you have a **{probability:.1%} chance** of experiencing burnout soon if no changes are made.")
+                st.markdown(f"Our assessment indicates you have a **{burnout_chance:.1%} chance** of experiencing burnout soon if no changes are made.")
             elif risk_level == 'medium':
                 st.warning("### ⚠️ Medium Risk of Burnout")
-                st.markdown(f"Our assessment indicates you have a **{probability:.1%} chance** of developing burnout symptoms if stress continues.")
+                st.markdown(f"Our assessment indicates you have a **{burnout_chance:.1%} chance** of developing burnout symptoms if stress continues.")
             else:
                 st.success("### ✅ Low Risk of Burnout")
-                # For low risk, we want to show the complementary probability (1-probability)
-                # since probability here is the chance of being in the low risk class
-                burnout_chance = 0.3  # From the model, low risk class has 30% chance of burnout
                 st.markdown(f"Our assessment indicates you have good balance with only a **{burnout_chance:.1%} chance** of burnout.")
         
         with col2:
@@ -329,6 +387,15 @@ def display_burnout_prediction(prediction: int, probability: float, user_data: p
             
         if 'screen_time' in user_data and user_data['screen_time'].iloc[0] > 8:
             risk_factors.append(f"• High screen time ({user_data['screen_time'].iloc[0]} hours daily)")
+            
+        if 'mood' in user_data and user_data['mood'].iloc[0] <= 2:
+            risk_factors.append(f"• Low mood rating ({user_data['mood'].iloc[0]}/5)")
+            
+        if 'motivation' in user_data and user_data['motivation'].iloc[0] <= 2:
+            risk_factors.append(f"• Low motivation ({user_data['motivation'].iloc[0]}/5)")
+            
+        if 'enjoyment_loss' in user_data and user_data['enjoyment_loss'].iloc[0] >= 3:
+            risk_factors.append(f"• Significant loss of interest in activities")
         
         if risk_factors:
             for factor in risk_factors:
@@ -501,12 +568,11 @@ def main():
         # Make prediction
         prediction = int(model.predict(user_data)[0])
         
-        # For clarity, extract the right probability based on the prediction class
+        # Get all probabilities
         probabilities = model.predict_proba(user_data)[0]
-        probability = probabilities[prediction]
         
         # Display results and recommendations
-        display_burnout_prediction(prediction, probability, user_data)
+        display_burnout_prediction(prediction, probabilities, user_data)
 
 if __name__ == "__main__":
     main()
