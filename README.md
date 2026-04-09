@@ -39,7 +39,7 @@ This project implements a Burnout Early Warning System (BEWS) that leverages pre
 3. **Run the Application**
    Launch the diagnostic interface via Streamlit:
    ```bash
-   streamlit run code.py
+   python -m streamlit run code.py
    ```
 
 ## Workflow
