@@ -1,6 +1,6 @@
 """
 Burnout Early Warning System
-Prediction and Intervention Engine
+Prediction and Intervention Engine.
 """
 
 import os
